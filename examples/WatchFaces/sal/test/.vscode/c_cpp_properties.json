@@ -1,0 +1,33 @@
+{
+    "env": {
+        "arduino_install": "/home/sal/.arduino15/packages/esp32/"
+    },
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/sal/Desktop/watchy/Watchy/src/**",
+                "/home/sal/Arduino/libraries/**"
+                // "${arduino_install}/hardware/arduino/avr/cores/arduino/**",
+                // "${arduino_install}/hardware/arduino/avr/libraries/EEPROM/**",
+                // "${arduino_install}/hardware/arduino/avr/libraries/HID/**",
+                // "${arduino_install}/hardware/arduino/avr/libraries/SPI/**",
+                // "${arduino_install}/hardware/arduino/avr/libraries/SoftwareSerial/**",
+                // "${arduino_install}/hardware/arduino/avr/libraries/Wire/**",
+                // "${arduino_install}/hardware/tools/avr/avr/include/**",
+                // "${arduino_install}/hardware/tools/avr/avr/include/avr/**",
+                // "${arduino_install}/hardware/tools/avr/avr/include/compat/**",
+                // "${arduino_install}/hardware/tools/avr/avr/include/util/**",
+                // "${arduino_install}/hardware/tools/avr/lib/gcc/avr/4.*.*/include/**",
+                // "${arduino_install}/hardware/tools/avr/lib/gcc/avr/4.*.*/include-fixed/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
