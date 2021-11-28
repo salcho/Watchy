@@ -3,7 +3,7 @@
 
 #include <Watchy.h>
 #include "WString.h"
-#include "GoogleSans_Regular20pt7b.h"
+#include "FreeMono12pt7b.h"
 
 class Worldclock : public Watchy {
     public:
@@ -11,7 +11,10 @@ class Worldclock : public Watchy {
         void drawWatchFace();
 
     private:
-        std::string buildTime();
+        uint16_t x_offset, y_offset;
+        
+        String buildTime(int offset);
+        void writeLine(String txt);
 };
 
 #endif
