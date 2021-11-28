@@ -1,7 +1,4 @@
 {
-    "env": {
-        "arduino_install": "/home/sal/Downloads/arduino/arduino-1.8.16/"
-    },
     "version": 4,
     "configurations": [
         {
@@ -15,16 +12,7 @@
             "forcedInclude": [],
             "cStandard": "gnu17",
             "cppStandard": "gnu++14",
-            "defines": [],
-            "browse": {
-                "limitSymbolsToIncludedHeaders": false,
-                "path": [
-                    "${workspaceRoot}",
-                    "${arduino_install}/hardware",
-                    "/home/sal/Desktop/watchy/Watchy/src"
-                ]
-            }
-
+            "defines": []
         },
         {
             "name": "Arduino",
