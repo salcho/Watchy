@@ -1,4 +1,3 @@
-#include <string>
 #include "Worldclock.h"
 
 Worldclock::Worldclock() {
@@ -14,33 +13,58 @@ void Worldclock::drawWatchFace() {
     display.setTextColor(GxEPD_BLACK);
     display.setTextWrap(false);
     
+    drawMoons(25/* icon_size */);
+
     writeLine("ZRH " + buildTime(0));
     writeLine("BOG " + buildTime(-6));
-    writeLine("NYC " + buildTime(-6));
-    writeLine("MTV " + buildTime(-9));
+    // writeLine("MTV " + buildTime(-9));
     
-    drawMoonsInCorners(25);
+    display.drawBitmap(200 - 37, 200 - 21, battery, 37, 21, GxEPD_BLACK);
+
+    display.print(String(currentTime.Day) + "/" + String(currentTime.Month));
 }
 
 // x,y is top left corner
-void Worldclock::drawMoonsInCorners(int icon_size) {
-    MoonPhase moon_phase = getMoonPhase();
-    // top-left
-    display.drawBitmap(0, 0, moon_waning_crescent, icon_size, icon_size, moon_phase == WANING_CRESCENT ? GxEPD_BLACK : GxEPD_WHITE, moon_phase == WANING_CRESCENT ? GxEPD_WHITE : GxEPD_BLACK);
-    // top-middle                      
-    display.drawBitmap(100 - icon_size/2, 0, moon_new, icon_size, icon_size, moon_phase == NEW ? GxEPD_BLACK : GxEPD_WHITE, moon_phase == NEW ? GxEPD_WHITE : GxEPD_BLACK);
-    // top-right
-    display.drawBitmap(200 - icon_size, 0, moon_waxing_crescent, icon_size, icon_size, moon_phase == WAXING_CRESCENT ? GxEPD_BLACK : GxEPD_WHITE, moon_phase == WAXING_CRESCENT ? GxEPD_WHITE : GxEPD_BLACK);
-    // middle-left   
-    display.drawBitmap(0, 100 - icon_size/2, moon_third_quarter, icon_size, icon_size, moon_phase == THIRD_QUARTER ? GxEPD_BLACK : GxEPD_WHITE, moon_phase == THIRD_QUARTER ? GxEPD_WHITE : GxEPD_BLACK);
-    // middle-right
-    display.drawBitmap(200 - icon_size, 100 - icon_size/2, moon_first_quarter, icon_size, icon_size, moon_phase == FIRST_QUARTER ? GxEPD_BLACK : GxEPD_WHITE, moon_phase == FIRST_QUARTER ? GxEPD_WHITE : GxEPD_BLACK);  
-    // bottom-left        
-    display.drawBitmap(0, 200 - icon_size, moon_waning_gibbous, icon_size, icon_size, moon_phase == WANING_GIBBOUS ? GxEPD_BLACK : GxEPD_WHITE, moon_phase == WANING_GIBBOUS ? GxEPD_WHITE : GxEPD_BLACK);
-    // bottom-middle            
-    display.drawBitmap(100 - icon_size/2, 200 - icon_size, moon_full, icon_size, icon_size, moon_phase == FULL ? GxEPD_BLACK : GxEPD_WHITE, moon_phase == FULL ? GxEPD_WHITE : GxEPD_BLACK);
-    // bottom-right
-    display.drawBitmap(200 - icon_size, 200 - icon_size, moon_waxing_gibbous, icon_size, icon_size, moon_phase == WAXING_GIBBOUS ? GxEPD_BLACK : GxEPD_WHITE, moon_phase == WAXING_GIBBOUS ? GxEPD_WHITE : GxEPD_BLACK);
+void Worldclock::drawMoons(int icon_size) {
+    display.drawBitmap(0, icon_size*0, moon_new, icon_size, icon_size, GxEPD_WHITE, GxEPD_BLACK);
+    display.drawBitmap(0, icon_size*1, moon_waxing_crescent, icon_size, icon_size, GxEPD_WHITE, GxEPD_BLACK);
+    display.drawBitmap(0, icon_size*2, moon_first_quarter, icon_size, icon_size, GxEPD_WHITE, GxEPD_BLACK);  
+    display.drawBitmap(0, icon_size*3, moon_waxing_gibbous, icon_size, icon_size, GxEPD_WHITE, GxEPD_BLACK);
+    display.drawBitmap(0, icon_size*4, moon_full, icon_size, icon_size, GxEPD_WHITE, GxEPD_BLACK);
+    display.drawBitmap(0, icon_size*5, moon_waning_gibbous, icon_size, icon_size, GxEPD_WHITE, GxEPD_BLACK);
+    display.drawBitmap(0, icon_size*6, moon_third_quarter, icon_size, icon_size, GxEPD_WHITE, GxEPD_BLACK);
+    display.drawBitmap(0, icon_size*7, moon_waning_crescent, icon_size, icon_size, GxEPD_WHITE, GxEPD_BLACK);
+
+    // clear highlight
+    for(int8_t row = 0; row < 8; row++) {
+        display.drawRect(0, icon_size*row, icon_size, icon_size, GxEPD_WHITE);
+    }
+    switch (getMoonPhase()) {
+        case MoonPhase::NEW:
+            display.drawRect(0, icon_size*0, icon_size, icon_size, GxEPD_BLACK);
+        break;
+        case MoonPhase::WAXING_CRESCENT:
+            display.drawRect(0, icon_size*1, icon_size, icon_size, GxEPD_BLACK);
+        break;
+        case MoonPhase::FIRST_QUARTER:
+            display.drawRect(0, icon_size*2, icon_size, icon_size, GxEPD_BLACK);
+        break;
+        case MoonPhase::WAXING_GIBBOUS:
+            display.drawRect(0, icon_size*3, icon_size, icon_size, GxEPD_BLACK);
+        break;
+        case MoonPhase::FULL:
+            display.drawRect(0, icon_size*4, icon_size, icon_size, GxEPD_BLACK);
+        break;
+        case MoonPhase::WANING_GIBBOUS:
+            display.drawRect(0, icon_size*5, icon_size, icon_size, GxEPD_BLACK);
+        break;
+        case MoonPhase::THIRD_QUARTER:
+            display.drawRect(0, icon_size*6, icon_size, icon_size, GxEPD_BLACK);
+        break;
+        case MoonPhase::WANING_CRESCENT:
+            display.drawRect(0, icon_size*7, icon_size, icon_size, GxEPD_BLACK);
+        break;
+    }
 }
 
 /**
@@ -87,6 +111,7 @@ void Worldclock::writeLine(String txt) {
         &x_boundary, &y_boundary, 
         &width, &height);
 
+    // cursor is the bottom-left corner of print
     display.setCursor(this->x_offset, this->y_offset + height);
     display.print(txt);
     // move offset to next line
