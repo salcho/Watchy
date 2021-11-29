@@ -1,27 +1,77 @@
 #include "Worldclock.h"
+#include "Fonts/FreeMono24pt7b.h"
+#include "Fonts/FreeMono9pt7b.h"
 
 Worldclock::Worldclock() {
-    x_offset = 30;
+    x_offset = 50;
     y_offset = 30;
 }
 
 // display is 200x200
 // cursor starts at top left
 void Worldclock::drawWatchFace() {
-    display.setFont(&FreeMono12pt7b);
     display.fillScreen(GxEPD_WHITE);
     display.setTextColor(GxEPD_BLACK);
     display.setTextWrap(false);
     
     drawMoons(25/* icon_size */);
+    drawClock();
 
-    writeLine("ZRH " + buildTime(0));
-    writeLine("BOG " + buildTime(-6));
-    // writeLine("MTV " + buildTime(-9));
+    // body
+    display.setFont(&FreeMono9pt7b);
     
-    display.drawBitmap(200 - 37, 200 - 21, battery, 37, 21, GxEPD_BLACK);
+    // battery
+    display.drawBitmap(200 - 28, 200 - 30, battery, 28, 30, GxEPD_WHITE, GxEPD_BLACK);
+    drawDate();
 
-    display.print(String(currentTime.Day) + "/" + String(currentTime.Month));
+    display.drawBitmap(90, 130, colombia, 50, 50, GxEPD_WHITE, GxEPD_BLACK);
+    display.setCursor(90 + 50, 130 + 50/2);
+    display.print(buildTime(-6));
+}
+
+void Worldclock::drawDate() {
+    display.setCursor(30, 195);
+    String txt = String(currentTime.Day) + "/" + String(currentTime.Month);
+    display.print(txt);
+
+    int16_t x, y;
+    uint16_t width, height;
+    display.getTextBounds(txt, 
+        display.getCursorX(), display.getCursorY(), 
+        &x, &y, 
+        &width, &height);
+
+    display.setCursor(30, 195 - height);
+    uint8_t wday = currentTime.Wday;
+    if (wday == 1) {
+        txt = "DOMINGO";
+    } else if (wday == 2) {
+        txt = "LUNES";
+    } else if (wday == 3) {
+        txt = "MARTES";
+    } else if (wday == 4) {
+        txt = "MIERCOLES";
+    } else if (wday == 5) {
+        txt = "JUEVES";
+    } else if (wday == 6) {
+        txt = "VIERNES";
+    } else if (wday == 7) {
+        txt = "SABADO";
+    }
+    display.print(txt);
+}
+
+void Worldclock::drawClock() {
+    display.setFont(&FreeMono24pt7b);
+    int16_t x_boundary, y_boundary;
+    uint16_t width, height;
+    
+    display.getTextBounds(buildTime(0), 
+        display.getCursorX(), display.getCursorY(), 
+        &x_boundary, &y_boundary, 
+        &width, &height);
+    display.setCursor(100 - width/2, height + 10);
+    display.print(buildTime(0));
 }
 
 // x,y is top left corner
@@ -35,10 +85,6 @@ void Worldclock::drawMoons(int icon_size) {
     display.drawBitmap(0, icon_size*6, moon_third_quarter, icon_size, icon_size, GxEPD_WHITE, GxEPD_BLACK);
     display.drawBitmap(0, icon_size*7, moon_waning_crescent, icon_size, icon_size, GxEPD_WHITE, GxEPD_BLACK);
 
-    // clear highlight
-    for(int8_t row = 0; row < 8; row++) {
-        display.drawRect(0, icon_size*row, icon_size, icon_size, GxEPD_WHITE);
-    }
     switch (getMoonPhase()) {
         case MoonPhase::NEW:
             display.drawRect(0, icon_size*0, icon_size, icon_size, GxEPD_BLACK);
