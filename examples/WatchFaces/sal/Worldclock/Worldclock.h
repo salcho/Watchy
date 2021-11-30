@@ -24,8 +24,10 @@ class Worldclock : public Watchy {
         String buildTime(int offset);
         void writeLine(String txt);
         void drawMoons(int icon_size);
+        void drawBody();
         void drawClock();
         void drawDate();
+        void drawBattery();
         Worldclock::MoonPhase getMoonPhase();
 };
 

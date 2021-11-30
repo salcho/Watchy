@@ -19,13 +19,36 @@ void Worldclock::drawWatchFace() {
 
     // body
     display.setFont(&FreeMono9pt7b);
+    drawBody();
     
-    // battery
-    display.drawBitmap(200 - 28, 200 - 30, battery, 28, 30, GxEPD_WHITE, GxEPD_BLACK);
+    drawBattery();
     drawDate();
+}
 
-    display.drawBitmap(90, 130, colombia, 50, 50, GxEPD_WHITE, GxEPD_BLACK);
-    display.setCursor(90 + 50, 130 + 50/2);
+/**
+ * Draws the battery level by drawing a filled rectangle at the bottom left corner of the battery icon and then passing a negative length to draw upwards.
+ * The max battery voltage is 4.20 and the height of the battery icon is icon_height - 2*top_margin, so the current voltage is translated into 'icon height'
+ * by: batteryVoltage * iconHeight / 4.2 
+ * _________
+ * |   _    |
+ * | _|_|_  |
+ * | |    | |
+ * | |    | |
+ * | |    | |
+ * | |____| |
+ * |________|
+ */
+void Worldclock::drawBattery() {
+    int8_t icon_width = 28, icon_height = 30, side_margin = 8, top_margin = 4;
+    display.drawBitmap(200 - icon_width, 200 - icon_height, battery, icon_width, icon_height, GxEPD_WHITE, GxEPD_BLACK);
+    int16_t battery_level = (getBatteryVoltage() * (icon_height - 2*top_margin)) / 4.2;
+    display.fillRect(200 - icon_width + side_margin, 200 - top_margin, icon_width - side_margin*2, -battery_level, GxEPD_BLACK);
+}
+
+void Worldclock::drawBody() {
+    int x_offset = 45, y_offset = 90, icon_size = 50;
+    display.drawBitmap(x_offset, y_offset, colombia, icon_size, icon_size, GxEPD_WHITE, GxEPD_BLACK);
+    display.setCursor(x_offset + icon_size, y_offset + icon_size/2);
     display.print(buildTime(-6));
 }
 
@@ -169,7 +192,7 @@ String Worldclock::buildTime(int offset) {
     if (currentTime.Hour + offset < 10) {
         time += "0";
     }
-    time += currentTime.Hour + offset;
+    time += String(currentTime.Hour + offset);
     time += ":";
     if (currentTime.Minute < 10){
         time += "0";
