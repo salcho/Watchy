@@ -2,13 +2,9 @@
 #include "Fonts/FreeMono24pt7b.h"
 #include "Fonts/FreeMono9pt7b.h"
 
-Worldclock::Worldclock() {
-    x_offset = 50;
-    y_offset = 30;
-}
+Worldclock::Worldclock() {}
 
 // display is 200x200
-// cursor starts at top left
 void Worldclock::drawWatchFace() {
     display.fillScreen(GxEPD_WHITE);
     display.setTextColor(GxEPD_BLACK);
@@ -170,21 +166,6 @@ Worldclock::MoonPhase Worldclock::getMoonPhase() {
     
     // percent_in_cycle > 84.6 && percent_in_cycle <= 99)
     return MoonPhase::WANING_CRESCENT;
-}
-
-void Worldclock::writeLine(String txt) {
-    int16_t x_boundary, y_boundary;
-    uint16_t width, height;
-    display.getTextBounds(txt, 
-        display.getCursorX(), display.getCursorY(), 
-        &x_boundary, &y_boundary, 
-        &width, &height);
-
-    // cursor is the bottom-left corner of print
-    display.setCursor(this->x_offset, this->y_offset + height);
-    display.print(txt);
-    // move offset to next line
-    this->y_offset += height + 5;
 }
 
 String Worldclock::buildTime(int offset) {
