@@ -587,13 +587,7 @@
                 "__ATOMIC_ACQ_REL=4",
                 "__ATOMIC_RELEASE=3",
                 "USBCON"
-            ],
-            "browse": {
-                "path": [
-                    "~/.arduino15/packages/esp32/",
-                    "~/Arduino/libraries/"
-                ]
-            }
+            ]
         }
     ]
 }

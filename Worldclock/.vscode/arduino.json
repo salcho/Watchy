@@ -3,5 +3,7 @@
     "board": "esp32:esp32:esp32",
     "sketch": "Worldclock.ino",
     "port": "/dev/ttyUSB0",
-    "output": "../ArduinoOutput"
+    "output": "../ArduinoOutput",
+    "debugger": "jlink",
+    "intelliSenseGen": "global"
 }

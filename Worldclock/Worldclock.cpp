@@ -2,6 +2,12 @@
 #include "Fonts/FreeMono24pt7b.h"
 #include "Fonts/FreeMono9pt7b.h"
 
+RTC_DATA_ATTR int8_t current_day;
+// TODO: try this with Preferences.h 
+// RTC_DATA_ATTR const char* timezone;
+RTC_DATA_ATTR int timezone_offset;
+RTC_DATA_ATTR bool has_fetched;
+
 Worldclock::Worldclock() {}
 
 // display is 200x200
@@ -13,6 +19,8 @@ void Worldclock::drawWatchFace() {
     if (currentTime.Hour == 0 && currentTime.Minute == 0) {
         sensor.resetStepCounter();
     }
+
+    updateFromWifi();
     
     drawMoons(25/* icon_size */);
     drawClock();
@@ -25,9 +33,40 @@ void Worldclock::drawWatchFace() {
     drawDate();
 }
 
+void Worldclock::updateFromWifi() {
+    // update only once per day
+    if (has_fetched && current_day == currentTime.Wday) {
+        return;
+    }
+
+    current_day = currentTime.Wday;
+    if (!connectWiFi()) {
+        Serial.println("[-] Failed connecting to WiFi. Not updating.");
+        return;
+    }
+    
+    Serial.println("[*] Starting Wifi update.");
+    HTTPClient http;
+    http.setConnectTimeout(3000);
+    http.setReuse(false);
+    http.begin(String("https://api.ipgeolocation.io/timezone?apiKey=") + String(IPGEO_API_KEY));
+    int responseCode = http.GET();
+    if (responseCode == 200) {
+        String body = http.getString();
+        JSONVar responseObj = JSON.parse(body);
+        timezone_offset = int(responseObj["timezone_offset"]);
+        has_fetched = true;
+        Serial.println("[+] Timezone set.");
+    } else {
+        Serial.printf("[-] Failed fetching timezone: %s\n", http.errorToString(responseCode).c_str());
+    }
+
+    http.end();
+}
+
 /**
  * Draws the battery level by drawing a filled rectangle at the bottom left corner of the battery icon and then passing a negative length to draw upwards.
- * The max battery voltage is 4.20 and the height of the battery icon is icon_height - 2*top_margin, so the current voltage is translated into 'icon height'
+ * The max battery voltage is 4.25 and the height of the battery icon is icon_height - 2*top_margin, so the current voltage is translated into 'icon height'
  * by: batteryVoltage * iconHeight / 4.2 
  * _________
  * |   _    |
@@ -41,18 +80,24 @@ void Worldclock::drawWatchFace() {
 void Worldclock::drawBattery() {
     int8_t icon_width = 28, icon_height = 30, side_margin = 8, top_margin = 4;
     display.drawBitmap(200 - icon_width, 200 - icon_height, battery, icon_width, icon_height, GxEPD_WHITE, GxEPD_BLACK);
-    int16_t battery_level = (getBatteryVoltage() * (icon_height - 2*top_margin)) / 4.2;
+    int16_t battery_level = (getBatteryVoltage() * (icon_height - 2*top_margin)) / 4.25;
     display.fillRect(200 - icon_width + side_margin, 200 - top_margin, icon_width - side_margin*2, -battery_level, GxEPD_BLACK);
 }
 
 void Worldclock::drawBody() {
-    Serial.println("Voltage is: " + String(getBatteryVoltage()));
-    Serial.println("WiFi status is:" + String(WIFI_CONFIGURED));
+    int16_t x, y;
+    uint16_t width, height;
+    display.getTextBounds(timezone, 
+        display.getCursorX(), display.getCursorY(), 
+        &x, &y, 
+        &width, &height);
+    display.setCursor(100 - width/2, 60);
+    display.print(timezone);
 
     int x_offset = 45, y_offset = 70, icon_size = 50;
     display.drawBitmap(x_offset, y_offset, colombia, icon_size, icon_size, GxEPD_WHITE, GxEPD_BLACK);
     display.setCursor(x_offset + icon_size, y_offset + icon_size/2);
-    display.print(buildTime(-6));
+    display.print(buildTime(-5));
 
     display.drawBitmap(x_offset, y_offset + icon_size, steps, 40, 40, GxEPD_WHITE, GxEPD_BLACK);
     display.setCursor(x_offset + icon_size, y_offset + icon_size + 40/2);
@@ -96,12 +141,13 @@ void Worldclock::drawClock() {
     int16_t x_boundary, y_boundary;
     uint16_t width, height;
     
-    display.getTextBounds(buildTime(0), 
+    String time = buildTime(timezone_offset);
+    display.getTextBounds(time, 
         display.getCursorX(), display.getCursorY(), 
         &x_boundary, &y_boundary, 
         &width, &height);
     display.setCursor(100 - width/2, height + 10);
-    display.print(buildTime(0));
+    display.print(time);
 }
 
 // x,y is top left corner
